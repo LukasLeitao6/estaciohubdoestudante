@@ -1,0 +1,1857 @@
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, Picker } from 'react-native';
+
+// Dados das dúvidas por disciplina (Existente)
+const DUVIDAS_POR_DISCIPLINA = {
+  'Programação para dispositivos Mobile': [
+    {
+      id: 1,
+      aluno: 'Hebert Freire',
+      duvida: 'O react native e o react js são a mesma coisa?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 2,
+      aluno: 'Thais Moura',
+      duvida: 'Como posso atualizar o estado de um componente em React Native ao receber novos dados de uma API sem causar múltiplas renderizações?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ],
+  'Pensamento Computacional': [
+    {
+      id: 3,
+      aluno: 'Lucas Leitão',
+      duvida: 'Como decompor um problema complexo em partes menores para facilitar a programação de um aplicativo educacional?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 4,
+      aluno: 'Hebert Freire',
+      duvida: 'Qual a diferença entre abstração e generalização no contexto da resolução de problemas computacionais?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ],
+  'Jornalismo Investigativo': [
+    {
+      id: 5,
+      aluno: 'Lucas Leitão',
+      duvida: 'Os gastos da Janja com itens de luxo condizem com os princípios de austeridade do governo federal?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 6,
+      aluno: 'Thais Moura',
+      duvida: 'Como as quadrilhas desviam milhões do INSS sem levantar suspeitas imediatas dos órgãos de controle?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ],
+  'Jornalismo Esportivo': [
+    {
+      id: 7,
+      aluno: 'Lucas Leitão',
+      duvida: 'A volta do Neymar ao Santos trouxe retorno técnico e financeiro compatível com o investimento feito?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 8,
+      aluno: 'Lucas Leitão',
+      duvida: 'O que muda no estilo da Seleção Brasileira com Carlo Ancelotti no comando?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ],
+  'Massas': [
+    {
+      id: 9,
+      aluno: 'Hebert Freire',
+      duvida: 'Qual a importância da escolha do tipo de farinha na preparação de massas artesanais?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 10,
+      aluno: 'Thais Moura',
+      duvida: 'Como o tempo de repouso da massa influencia na elasticidade e qualidade final do preparo?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ],
+  'Carnes e Peixes': [
+    {
+      id: 11,
+      aluno: 'Hebert Freire',
+      duvida: 'Como a maturação da carne influencia no sabor e na maciez do corte?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    },
+    {
+      id: 12,
+      aluno: 'Thais Moura',
+      duvida: 'Quais os principais erros ao selar uma carne e como evitá-los para manter a suculência?',
+      moedas: 5,
+      expandida: false,
+      resposta: ''
+    }
+  ]
+};
+
+// Dados dos grupos de estudo (Existente)
+const GRUPOS_ESTUDO = {
+  'Pensamento Computacional': [
+    {
+      id: 1,
+      titulo: 'Estudo de caso para API responsivas em empresas',
+      descricao: 'Estudar possíveis soluções para o simulado da cadeira Pensamento Computacional',
+      informacoes: 'Sexta-Feira; ás 17:00; na Biblioteca, até 5 pessoas. Contato via chat ou Whats App: (85)99877-6523'
+    },
+    {
+      id: 2,
+      titulo: 'Estudo sobre tipos de vírus e possíveis soluções',
+      descricao: 'Analisar diversos casos de virus famosos e estudar juntos como combate-los',
+      informacoes: 'Toda Segunda; ás 15:00; na Biblioteca, até 3 pessoas com experiência em computação (não temos como ensinar). Contato via chat ou Email: craniosvirus@gmail.com'
+    }
+  ],
+  'Análise e Desenvolvimento de Sistemas': [
+    {
+      id: 3,
+      titulo: 'Cloud na Apple: funcionamento, vantagens e limitações',
+      descricao: 'Estudo aprofundado sobre o uso de computação em nuvem em produtos Apple e como se diferencia de outras soluções de mercado',
+      informacoes: 'Quarta-feira; às 16:00; Sala 204 do Bloco B; até 4 pessoas. Contato via WhatsApp: (85)99811-2209'
+    },
+    {
+      id: 4,
+      titulo: 'Estudo focado em React para provas finais',
+      descricao: 'Grupo com foco em revisão para provas da disciplina de React, com ênfase em hooks, estados e interfaces funcionais',
+      informacoes: 'Terça e Quinta; às 18:00; na Biblioteca; até 6 pessoas. Contato via chat privado ou Telegram: @estudoreact'
+    }
+  ],
+  'Jornalismo Investigativo': [
+    {
+      id: 5,
+      titulo: 'Estudo de caso: O Maníaco do Parque e o jornalismo investigativo',
+      descricao: 'Análise do trabalho investigativo retratado no filme/documentário sobre o Maníaco do Parque e como a imprensa colaborou nas investigações',
+      informacoes: 'Sábado; às 10:00; Sala de Vídeo A; até 10 pessoas. Contato via e-mail: investigapark@gmail.com'
+    },
+    {
+      id: 6,
+      titulo: 'Mulheres no Jornalismo Investigativo: desafios e protagonismo',
+      descricao: 'Debate e troca de experiências sobre o papel e os desafios enfrentados por mulheres no jornalismo investigativo',
+      informacoes: 'Segunda-feira; às 17:30; Sala 302; exclusivo para mulheres. Até 8 vagas. Contato por WhatsApp: (85)99444-1821'
+    }
+  ],
+  'Jornalismo Esportivo': [
+    {
+      id: 7,
+      titulo: 'Ceará ou Fortaleza? Análise histórica dos últimos 10 anos',
+      descricao: 'Debate sobre qual clube teve maior exposição, resultados e relevância nacional na última década: Ceará ou Fortaleza?',
+      informacoes: 'Sexta-feira; às 15:00; no auditório menor; até 15 pessoas. Contato via WhatsApp: (85)99998-3321'
+    },
+    {
+      id: 8,
+      titulo: 'Documentário do Vini Jr.: recepção e impacto social',
+      descricao: 'Grupo de análise e coleta de depoimentos sobre como o documentário de Vini Jr. foi percebido pela sociedade e pela mídia',
+      informacoes: 'Quarta; às 14:00; Laboratório de Jornalismo; até 7 pessoas. Contato via e-mail: vinijrdoc@gmail.com'
+    }
+  ],
+  'Massas': [
+    {
+      id: 9,
+      titulo: 'Massa fresca artesanal: práticas e erros comuns',
+      descricao: 'Encontro prático para aprender a preparar massas frescas e discutir os principais erros que afetam sabor e textura',
+      informacoes: 'Toda segunda; às 16:00; Cozinha 2; até 5 pessoas. Contato via WhatsApp: (85)99876-0090'
+    },
+    {
+      id: 10,
+      titulo: 'Farinhas e recheios ideais para ravióli',
+      descricao: 'Estudo comparativo entre tipos de farinha e recheios que valorizam o preparo de massas recheadas',
+      informacoes: 'Quinta-feira; às 18:00; Cozinha experimental; até 4 pessoas. Contato via e-mail: ravioligourmet@culinaria.com'
+    }
+  ],
+  'Carnes e Peixes': [
+    {
+      id: 11,
+      titulo: 'Peixes grelhados e sua textura: desafios de cocção',
+      descricao: 'Grupo voltado à prática de técnicas para grelhar peixes sem perder suculência e integridade',
+      informacoes: 'Terça; às 17:00; Cozinha Profissional; até 5 participantes. Contato por WhatsApp: (85)99777-1212'
+    },
+    {
+      id: 12,
+      titulo: 'Ponto certo de cocção: teoria e prática com tilápia e salmão',
+      descricao: 'Aprofundamento nos sinais visuais e táteis para garantir o ponto ideal em diferentes espécies de peixe',
+      informacoes: 'Sexta-feira; às 10:00; Cozinha 1; até 3 pessoas. Contato via chat interno'
+    }
+  ]
+};
+
+// Dados dos grupos de networking (Existente)
+const GRUPOS_NETWORKING = [
+  {
+    id: 1,
+    titulo: 'Encontro de católicos',
+    descricao: 'Vamos nos encontrar, discutir temas da semana e como a religiosidade afeta nas nossas vidas',
+    informacoes: 'Às Segundas e Quintas; das 13:00 às 14:00; Sala A23. Contato via chat ou WPP: (88) 98737-6533'
+  },
+  {
+    id: 2,
+    titulo: 'Fut da tecnologia',
+    descricao: 'Chamando todos os alunos do bloco de tecnologia para um racha entre alunos e professores',
+    informacoes: 'Às Sextas; das 16:00 às 18:00; Ginásio. Contato via chat ou WPP: (85) 99809-9513'
+  },
+  {
+    id: 3,
+    titulo: 'Torneio de EAFC',
+    descricao: 'Todos convidados para jogar um fifinha valendo prêmios, so se inscrever',
+    informacoes: 'Sábado 29/06; a partir das 8:00; No laboratório B6. Contato via chat ou WPP: (85) 99809-9513'
+  },
+  {
+    id: 4,
+    titulo: 'Encontro com seletor de estagio',
+    descricao: 'Convidamos um seletor de estagio em diferentes áreas de grandes instituições ou empresas para conversas ou seleções surpresas com nossos alunos, encontros semanais!',
+    informacoes: 'Às Quartas-Feiras ; a partir das 20:00; No auditório do bloco B. Contato via chat ou entre no canal do Telegram para ficar atento ao encontro semanal: @stagionaestacio'
+  },
+  {
+    id: 5,
+    titulo: 'Passeio no Beach Park',
+    descricao: 'Procuramos interessados em ir ao Beach Park para fechar passeio com empresa, mínimo de 10 interessados',
+    informacoes: 'Dia 31/07 ; a partir das 8:00; Na entrada. Contato via chat, email: passeiobpestacio@gmail.com e Wpp: (85) 99988-0019'
+  }
+];
+
+// --- NOVOS DADOS MOCK --- 
+
+// Dados da Loja do Estudante
+const ITENS_LOJA = [
+  { id: 'loja1', descricao: '10% DE DESCONTO NA MENSALIDADE', moedas: 250 },
+  { id: 'loja2', descricao: '20% DE DESCONTO NA MENSALIDADE', moedas: 500 },
+  { id: 'loja3', descricao: '30% DE DESCONTO NA MENSALIDADE', moedas: 1000 },
+  { id: 'loja4', descricao: 'VOUCHER DE 20 REAIS NAS CANTINAS ESTACIO', moedas: 150 },
+  { id: 'loja5', descricao: 'CAMISA ESTACIO DO SEU CURSO', moedas: 300 },
+  { id: 'loja6', descricao: '4 HORAS COMPLEMENTARES', moedas: 200 },
+];
+
+// Dados dos Chats Simulados
+const CHATS_SIMULADOS = [
+  {
+    id: 'chat1',
+    remetente: 'Hebert Freire',
+    nomeGrupo: 'Estudo React Native Avançado',
+    naoLidas: 2,
+    tipo: 'estudo', // 'estudo', 'networking', 'aprovacao'
+    expandido: false,
+    mensagens: [
+      { id: 'msg1a', autor: 'Hebert Freire', texto: 'E aí pessoal, alguém conseguiu resolver aquele bug do state que não atualizava?' },
+      { id: 'msg1b', autor: 'Você', texto: 'Ainda não, Hebert. Tentei algumas abordagens mas sem sucesso.' },
+      { id: 'msg1c', autor: 'Hebert Freire', texto: 'Acho que descobri! Era um problema com a chamada assíncrona. Vou mandar o código corrigido.' },
+    ]
+  },
+  {
+    id: 'chat2',
+    remetente: 'Thais Moura',
+    nomeGrupo: 'Networking Devs Ceará',
+    naoLidas: 5,
+    tipo: 'networking',
+    expandido: false,
+    mensagens: [
+      { id: 'msg2a', autor: 'Thais Moura', texto: 'Oi Lucas! Vi que você também está na área de mobile. Tem alguma dica de evento de tecnologia rolando por aqui?' },
+      { id: 'msg2b', autor: 'Você', texto: 'Opa Thais! Fiquei sabendo de um meetup sobre Flutter semana que vem. Te interessa?' },
+      { id: 'msg2c', autor: 'Thais Moura', texto: 'Opa, com certeza! Me manda o link? Valeu!' },
+    ]
+  },
+  {
+    id: 'chat3',
+    remetente: 'Abraão (Admin)',
+    nomeGrupo: 'Grupo de Estudos - Pensamento Computacional',
+    naoLidas: 1,
+    tipo: 'aprovacao',
+    expandido: false,
+    mensagens: [
+      { id: 'msg3a', autor: 'Abraão (Admin)', texto: 'Olá Lucas, sua solicitação para entrar no grupo de estudos de Pensamento Computacional foi aprovada! Seja bem-vindo!' },
+    ]
+  },
+];
+
+// Dados das Dúvidas Respondidas Simuladas
+const DUVIDAS_RESPONDIDAS_SIMULADAS = [
+  {
+    id: 'duvidaResp1',
+    perguntaResumo: 'Qual a diferença entre useEffect e useLayoutEffect no React...',
+    perguntaCompleta: 'Qual a diferença fundamental entre os hooks useEffect e useLayoutEffect no React e em que situações devo preferir usar useLayoutEffect?',
+    respondidoPor: 'Hebert Freire',
+    resposta: 'A principal diferença é quando eles rodam. useEffect roda *após* a renderização e a pintura na tela, de forma assíncrona. Já useLayoutEffect roda *após* a renderização, mas *antes* da pintura na tela, de forma síncrona. Use useLayoutEffect quando precisar ler ou alterar o layout do DOM imediatamente após uma atualização, para evitar "flickers" visuais, como ao medir a posição de um elemento.',
+    expandida: false,
+    avaliacao: 0,
+    comentario: '',
+    avaliacaoEnviada: false
+  },
+  {
+    id: 'duvidaResp2',
+    perguntaResumo: 'Como otimizar o carregamento de imagens grandes em React Native...',
+    perguntaCompleta: 'Como posso otimizar o carregamento de imagens grandes em um aplicativo React Native para melhorar a performance e a experiência do usuário?',
+    respondidoPor: 'Thais Moura',
+    resposta: 'Existem várias estratégias! Você pode usar componentes como `FastImage` para caching agressivo, redimensionar as imagens no servidor antes de enviar para o app, usar formatos mais eficientes como WebP, implementar lazy loading para carregar imagens apenas quando elas entram na viewport, e usar placeholders de baixa resolução enquanto a imagem principal carrega.',
+    expandida: false,
+    avaliacao: 0,
+    comentario: '',
+    avaliacaoEnviada: false
+  },
+  {
+    id: 'duvidaResp3',
+    perguntaResumo: 'É possível usar Redux e Context API juntos em um app...',
+    perguntaCompleta: 'É uma boa prática usar Redux e a Context API juntos em um mesmo aplicativo React Native? Quais seriam os casos de uso para cada um?',
+    respondidoPor: 'Hebert Freire',
+    resposta: 'Sim, é possível e pode ser uma boa prática! Redux é ótimo para gerenciar estado global complexo e compartilhado por muitos componentes distantes. Context API é mais simples e ideal para passar dados para baixo na árvore de componentes sem prop drilling, especialmente para estados que não mudam com tanta frequência ou que são relevantes apenas para uma subárvore específica. Você pode usar Context para temas, autenticação, e Redux para dados da aplicação mais complexos.',
+    expandida: false,
+    avaliacao: 0,
+    comentario: '',
+    avaliacaoEnviada: false
+  },
+];
+
+// --- FIM NOVOS DADOS MOCK ---
+
+export default function TelaInicial() {
+  // Estado principal para controle de navegação
+  const [tela, setTela] = useState('inicio'); // inicio, login, registro, home, duvida, responderDuvida, gruposEstudo, loja, chats, minhasDuvidas, compraConfirmada, avaliacaoDuvida, avaliacaoConfirmada
+
+  // Estados para registro e login (Existente)
+  const [registro, setRegistro] = useState({
+    nome: '', matricula: '', email: '', cpf: '', telefone: '', senha: '', confirmarSenha: '',
+    autorizaCelular: false, autorizaEmail: false, aceitaTermos: false,
+  });
+  const [login, setLogin] = useState({ usuario: '', senha: '' });
+  const [registroConfirmado, setRegistroConfirmado] = useState(false);
+
+  // Estados para o sistema de dúvidas (Existente)
+  const [duvida, setDuvida] = useState({
+    curso: '',
+    disciplina: '',
+    texto: '',
+    tipoResposta: '',
+    autorizaContato: false,
+    aceitaBiblioteca: false
+  });
+  const [duvidaEnviada, setDuvidaEnviada] = useState(false);
+
+  // Estados para responder dúvidas (Existente)
+  const [responderDuvida, setResponderDuvida] = useState({
+    curso: '',
+    disciplina: '',
+    duvidas: [],
+    respostaConfirmada: false
+  });
+  const [respostaEnviada, setRespostaEnviada] = useState(false);
+
+  // Estados para grupos de estudo (Existente)
+  const [grupoEstudo, setGrupoEstudo] = useState({
+    tela: 'inicio', // 'inicio', 'criar', 'entrar', 'criarForm', 'entrarForm', 'confirmacao', 'confirmacaoCriacao', 'confirmacaoNetworking'
+    curso: '',
+    disciplina: '',
+    tipoGrupo: '', // 'estudo' ou 'networking'
+    nomeGrupo: '',
+    descricao: '',
+    informacoes: '',
+    confirmacao: false,
+    grupoSelecionado: null,
+    gruposDisponiveis: [],
+    gruposNetworking: GRUPOS_NETWORKING.map(g => ({ ...g, expandido: false })),
+    mostrarNetworking: false, // Novo estado para controlar visibilidade
+    confirmacaoNetworkingId: null // Para saber qual grupo de networking foi solicitado
+  });
+
+  // --- NOVOS ESTADOS ---
+  const [eCoins, setECoins] = useState(1000); // Simulação de saldo
+  const [chats, setChats] = useState(CHATS_SIMULADOS);
+  const [mensagemChat, setMensagemChat] = useState('');
+  const [duvidasRespondidas, setDuvidasRespondidas] = useState(DUVIDAS_RESPONDIDAS_SIMULADAS);
+  const [duvidaParaAvaliar, setDuvidaParaAvaliar] = useState(null); // Guarda o ID da dúvida sendo avaliada
+  const [avaliacaoEstrelas, setAvaliacaoEstrelas] = useState(0);
+  const [avaliacaoComentario, setAvaliacaoComentario] = useState('');
+  // --- FIM NOVOS ESTADOS ---
+
+  // Dados dos cursos e disciplinas (Existente)
+  const cursosDisciplinas = {
+    'Análise e Desenvolvimento de Sistemas': [
+      'Programação para dispositivos Mobile',
+      'Pensamento Computacional'
+    ],
+    'Jornalismo': [
+      'Jornalismo Investigativo',
+      'Televisão',
+      'Jornalismo Esportivo'
+    ],
+    'Gastronomia': [
+      'Massas',
+      'Carnes e Peixes'
+    ]
+  };
+
+  // Funções auxiliares (Existente)
+  const handleRegistroChange = (campo, valor) => setRegistro({ ...registro, [campo]: valor });
+  const handleLoginChange = (campo, valor) => setLogin({ ...login, [campo]: valor });
+
+  // Funções para responder dúvidas (Existente)
+  const handleSelecionarDisciplina = (disciplina) => {
+    setResponderDuvida({
+      ...responderDuvida,
+      disciplina,
+      duvidas: DUVIDAS_POR_DISCIPLINA[disciplina] || []
+    });
+  };
+
+  const toggleExpandirDuvida = (id) => {
+    setResponderDuvida(prev => ({
+      ...prev,
+      duvidas: prev.duvidas.map(duvida =>
+        duvida.id === id ? { ...duvida, expandida: !duvida.expandida } : duvida
+      )
+    }));
+  };
+
+  const handleRespostaChange = (id, texto) => {
+    setResponderDuvida(prev => ({
+      ...prev,
+      duvidas: prev.duvidas.map(duvida =>
+        duvida.id === id ? { ...duvida, resposta: texto } : duvida
+      )
+    }));
+  };
+
+  const enviarResposta = (id) => {
+    const duvida = responderDuvida.duvidas.find(d => d.id === id);
+    if (!duvida.resposta) {
+      Alert.alert('Atenção', 'Por favor, escreva sua resposta antes de enviar');
+      return;
+    }
+    if (!responderDuvida.respostaConfirmada) {
+      Alert.alert('Atenção', 'Você deve confirmar que respondeu com seriedade');
+      return;
+    }
+    setRespostaEnviada(true);
+  };
+
+  // Funções para grupos de estudo (Existente)
+  const handleSelecionarDisciplinaGrupo = (disciplina) => {
+    setGrupoEstudo({
+      ...grupoEstudo,
+      disciplina,
+      gruposDisponiveis: GRUPOS_ESTUDO[disciplina] ?
+        GRUPOS_ESTUDO[disciplina].map(g => ({ ...g, expandido: false })) : []
+    });
+  };
+
+  const toggleExpandirGrupo = (id) => {
+    setGrupoEstudo(prev => ({
+      ...prev,
+      gruposDisponiveis: prev.gruposDisponiveis.map(grupo =>
+        grupo.id === id ? { ...grupo, expandido: !grupo.expandido } : { ...grupo, expandido: false }
+      )
+    }));
+  };
+
+  const toggleExpandirNetworking = (id) => {
+    setGrupoEstudo(prev => ({
+      ...prev,
+      gruposNetworking: prev.gruposNetworking.map(grupo =>
+        grupo.id === id ? { ...grupo, expandido: !grupo.expandido } : { ...grupo, expandido: false }
+      )
+    }));
+  };
+
+  const enviarSolicitacaoGrupo = () => {
+    if (!grupoEstudo.confirmacao) {
+      Alert.alert('Atenção', 'Você deve confirmar que compreende os termos de convivência');
+      return;
+    }
+    setGrupoEstudo({ ...grupoEstudo, tela: 'confirmacao' });
+  };
+
+  // --- NOVAS FUNÇÕES ---
+
+  // Função para comprar item da loja
+  const comprarItemLoja = (item) => {
+    if (eCoins >= item.moedas) {
+      // Lógica de dedução de moedas (simulada)
+      // setECoins(prev => prev - item.moedas);
+      setTela('compraConfirmada');
+    } else {
+      Alert.alert('Saldo Insuficiente', `Você não tem E-COINS suficientes para comprar ${item.descricao}.`);
+    }
+  };
+
+  // Função para expandir/recolher chat
+  const toggleExpandirChat = (id) => {
+    setChats(prev => prev.map(chat =>
+      chat.id === id ? { ...chat, expandido: !chat.expandido, naoLidas: 0 } : chat // Zera não lidas ao abrir
+    ));
+  };
+
+  // Função para enviar mensagem no chat (Atualizada para adicionar mensagem ao estado)
+  const enviarMensagemChat = (chatId) => {
+    if (mensagemChat.trim() === "") return;
+
+    const novaMensagem = {
+      id: `msg_${chatId}_${Date.now()}`,
+      autor: 'Você',
+      texto: mensagemChat.trim(),
+    };
+
+    setChats(prevChats =>
+      prevChats.map(chat =>
+        chat.id === chatId
+          ? { ...chat, mensagens: [...chat.mensagens, novaMensagem] }
+          : chat
+      )
+    );
+
+    setMensagemChat(''); // Limpa o input após enviar
+    // Alert.alert('Mensagem Enviada', '(Simulação) Sua mensagem foi enviada.'); // Removido alert de simulação
+  };
+
+  // Função para expandir/recolher dúvida respondida
+  const toggleExpandirDuvidaRespondida = (id) => {
+    setDuvidasRespondidas(prev => prev.map(duvida =>
+      duvida.id === id ? { ...duvida, expandida: !duvida.expandida } : duvida
+    ));
+  };
+
+  // Função para ir para a tela de avaliação
+  const iniciarAvaliacao = (id) => {
+    setDuvidaParaAvaliar(id);
+    setAvaliacaoEstrelas(0);
+    setAvaliacaoComentario('');
+    setTela('avaliacaoDuvida');
+  };
+
+  // Função para confirmar avaliação
+  const confirmarAvaliacao = () => {
+    if (avaliacaoEstrelas === 0) {
+      Alert.alert('Atenção', 'Por favor, selecione uma avaliação de 1 a 5 estrelas.');
+      return;
+    }
+    // Aqui iria a lógica para salvar a avaliação
+    console.log(`Avaliação para dúvida ${duvidaParaAvaliar}: ${avaliacaoEstrelas} estrelas, Comentário: "${avaliacaoComentario}"`);
+    // Atualiza o estado local para refletir que foi avaliado (opcional)
+    setDuvidasRespondidas(prev => prev.map(d => d.id === duvidaParaAvaliar ? { ...d, avaliacao: avaliacaoEstrelas, comentario: avaliacaoComentario, avaliacaoEnviada: true } : d));
+    setTela('avaliacaoConfirmada');
+  };
+
+  // --- FIM NOVAS FUNÇÕES ---
+
+  return (
+    <View style={styles.container}>
+      {/* Tela Inicial (Existente) */}
+      {tela === 'inicio' && (
+        <View style={styles.logoContainer}>
+          <Image source={{ uri: 'https://i.imgur.com/u9NYXzD.png' }} style={styles.logo} />
+          <TouchableOpacity style={styles.box} onPress={() => setTela('login')}>
+            <Text style={styles.boxText}>Entrar na conta</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.box} onPress={() => setTela('registro')}>
+            <Text style={styles.boxText}>Registre-se Aqui</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Tela de Login (Existente) */}
+      {tela === 'login' && (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Login</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Matrícula, CPF ou Email"
+            onChangeText={(text) => handleLoginChange('usuario', text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            secureTextEntry
+            onChangeText={(text) => handleLoginChange('senha', text)}
+          />
+          <TouchableOpacity style={styles.button} onPress={() => setTela('home')}>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setTela('inicio')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar ao menu principal</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Tela de Registro (Existente) */}
+      {tela === 'registro' && !registroConfirmado && (
+        <ScrollView style={styles.formContainer}>
+          <Text style={styles.title}>Registro</Text>
+          <TextInput style={styles.input} placeholder="Nome" onChangeText={(text) => handleRegistroChange('nome', text)} />
+          <TextInput style={styles.input} placeholder="Matrícula" onChangeText={(text) => handleRegistroChange('matricula', text)} />
+          <TextInput style={styles.input} placeholder="Email" onChangeText={(text) => handleRegistroChange('email', text)} />
+          <TextInput style={styles.input} placeholder="CPF" onChangeText={(text) => handleRegistroChange('cpf', text)} />
+          <TextInput style={styles.input} placeholder="Telefone" onChangeText={(text) => handleRegistroChange('telefone', text)} />
+          <TextInput style={styles.input} placeholder="Senha" secureTextEntry onChangeText={(text) => handleRegistroChange('senha', text)} />
+          <TextInput style={styles.input} placeholder="Confirmar Senha" secureTextEntry onChangeText={(text) => handleRegistroChange('confirmarSenha', text)} />
+
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity onPress={() => handleRegistroChange('autorizaCelular', !registro.autorizaCelular)} style={{ marginRight: 10 }}>
+              <Text style={{ fontSize: 18 }}>{registro.autorizaCelular ? '☑' : '☐'}</Text>
+            </TouchableOpacity>
+            <Text>Autorizo divulgar meu celular</Text>
+          </View>
+
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity onPress={() => handleRegistroChange('autorizaEmail', !registro.autorizaEmail)} style={{ marginRight: 10 }}>
+              <Text style={{ fontSize: 18 }}>{registro.autorizaEmail ? '☑' : '☐'}</Text>
+            </TouchableOpacity>
+            <Text>Autorizo divulgar meu email</Text>
+          </View>
+
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity onPress={() => handleRegistroChange('aceitaTermos', !registro.aceitaTermos)} style={{ marginRight: 10 }}>
+              <Text style={{ fontSize: 18 }}>{registro.aceitaTermos ? '☑' : '☐'}</Text>
+            </TouchableOpacity>
+            <Text>Concordo com os termos de uso *</Text>
+          </View>
+
+          <TouchableOpacity style={styles.button} onPress={() => {
+            if (!registro.aceitaTermos) {
+              Alert.alert('Erro', 'Você deve aceitar os termos de uso');
+              return;
+            }
+            // Adicionar validação de campos aqui se necessário
+            setRegistroConfirmado(true);
+          }}>
+            <Text style={styles.buttonText}>Confirmar Registro</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setTela('inicio')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar ao menu principal</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Confirmação de Registro (Existente) */}
+      {tela === 'registro' && registroConfirmado && (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Obrigado por se registrar!</Text>
+          <Text style={styles.confirmationText}>Volte ao menu inicial e clique em entrar, para inserir seus dados e adentrar a experiência do EstacioHub.</Text>
+          <TouchableOpacity onPress={() => {
+            setRegistroConfirmado(false);
+            setTela('inicio');
+          }} style={styles.button}>
+            <Text style={styles.buttonText}>Voltar ao menu principal</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Área do Estudante (Atualizada com novos botões) */}
+      {tela === 'home' && (
+        <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ padding: 16 }}>
+          <View style={[styles.topBar, { backgroundColor: 'white', padding: 16, borderRadius: 10, marginBottom: 16 }]}>
+            <Text style={{ fontWeight: 'bold' }}>Bem-vindo, Lucas Leitão</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Image source={{ uri: 'https://png.pngtree.com/png-clipart/20240703/original/pngtree-pixel-art-golden-coin-icon-vector-png-image_15470143.png' }} style={{ width: 20, height: 20, marginRight: 5 }} />
+              <Text style={{ fontWeight: 'bold', color: '#00C851' }}>{eCoins}</Text> {/* Exibe E-Coins */} 
+            </View>
+          </View>
+
+          <View style={{ alignItems: 'center', marginBottom: 20 }}>
+            <Image source={{ uri: 'https://i.imgur.com/u9NYXzD.png' }} style={{ width: 80, height: 80, marginBottom: 10 }} />
+            <Text style={{ color: 'white', fontSize: 24, fontWeight: 'bold' }}>Área do Estudante</Text>
+          </View>
+
+          <TouchableOpacity style={styles.box} onPress={() => setTela('duvida')}>
+            <Text style={styles.boxText}>Tenho uma dúvida</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.box} onPress={() => setTela('responderDuvida')}>
+            <Text style={styles.boxText}>Responder uma dúvida</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.box} onPress={() => {
+            setGrupoEstudo({ ...grupoEstudo, tela: 'inicio' });
+            setTela('gruposEstudo');
+          }}>
+            <Text style={styles.boxText}>Grupos de Estudo</Text>
+          </TouchableOpacity>
+
+          {/* --- BOTÃO ATUALIZADO --- */}
+          <TouchableOpacity style={styles.box} onPress={() => setTela('loja')}>
+            <Text style={styles.boxText}>Loja do Estudante</Text>
+          </TouchableOpacity>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            {/* --- BOTÃO ATUALIZADO --- */}
+            <TouchableOpacity style={[styles.box, { flex: 1, marginRight: 5 }]} onPress={() => setTela('chats')}>
+              <Text style={styles.boxText}>Meus Chats</Text>
+            </TouchableOpacity>
+            {/* --- BOTÃO ATUALIZADO --- */}
+            <TouchableOpacity style={[styles.box, { flex: 1, marginLeft: 5 }]} onPress={() => setTela('minhasDuvidas')}>
+              <Text style={styles.boxText}>Minhas Dúvidas</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={[styles.box, { backgroundColor: 'red', marginTop: 20 }]} onPress={() => setTela('inicio')}>
+            <Text style={[styles.boxText, { color: 'white' }]}>SAIR DA ÁREA DO ESTUDANTE</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Tela de Dúvidas com Dropdown (Existente) */}
+      {tela === 'duvida' && (
+        <ScrollView style={styles.formContainer}>
+          {!duvidaEnviada ? (
+            <>
+              <Text style={styles.title}>Enviar Dúvida</Text>
+
+              <Text style={styles.label}>Curso*:</Text>
+              <View style={styles.dropdownContainer}>
+                <Picker
+                  selectedValue={duvida.curso}
+                  onValueChange={(itemValue) => setDuvida({
+                    ...duvida,
+                    curso: itemValue,
+                    disciplina: '' // Reseta disciplina ao mudar curso
+                  })}
+                  style={styles.dropdown}
+                  mode="dropdown"
+                >
+                  <Picker.Item label="Selecione seu curso" value="" />
+                  {Object.keys(cursosDisciplinas).map((curso) => (
+                    <Picker.Item key={curso} label={curso} value={curso} />
+                  ))}
+                </Picker>
+              </View>
+
+              {duvida.curso && (
+                <>
+                  <Text style={styles.label}>Disciplina*:</Text>
+                  <View style={styles.dropdownContainer}>
+                    <Picker
+                      selectedValue={duvida.disciplina}
+                      onValueChange={(itemValue) => setDuvida({...duvida, disciplina: itemValue})}
+                      style={styles.dropdown}
+                      mode="dropdown"
+                    >
+                      <Picker.Item label="Selecione sua disciplina" value="" />
+                      {cursosDisciplinas[duvida.curso].map((disciplina) => (
+                        <Picker.Item key={disciplina} label={disciplina} value={disciplina} />
+                      ))}
+                    </Picker>
+                  </View>
+                </>
+              )}
+
+              <TextInput
+                style={[styles.input, {height: 120, textAlignVertical: 'top'}]}
+                placeholder="Descreva sua dúvida em detalhes..."
+                multiline
+                onChangeText={(text) => setDuvida({...duvida, texto: text})}
+              />
+
+              <Text style={styles.subtitle}>Como deseja ser respondido?</Text>
+              <View style={styles.optionsContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.responseButton,
+                    duvida.tipoResposta === 'chat' && styles.buttonGreen // Alterado para verde
+                  ]}
+                  onPress={() => setDuvida({...duvida, tipoResposta: 'chat'})}
+                >
+                  <Text style={styles.responseText}>Chat</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.responseButton,
+                    duvida.tipoResposta === 'contato' && styles.buttonGreen // Alterado para verde
+                  ]}
+                  onPress={() => setDuvida({...duvida, tipoResposta: 'contato'})}
+                >
+                  <Text style={styles.responseText}>Contato Direto</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.responseButton,
+                    duvida.tipoResposta === 'presencial' && styles.buttonGreen // Alterado para verde
+                  ]}
+                  onPress={() => setDuvida({...duvida, tipoResposta: 'presencial'})}
+                >
+                  <Text style={styles.responseText}>Encontro Presencial</Text>
+                </TouchableOpacity>
+              </View>
+
+              {duvida.tipoResposta === 'contato' && (
+                <View style={styles.checkboxContainer}>
+                  <TouchableOpacity
+                    onPress={() => setDuvida({...duvida, autorizaContato: !duvida.autorizaContato})}
+                    style={styles.checkbox}
+                  >
+                    <Text style={{fontSize: 18}}>
+                      {duvida.autorizaContato ? '☑' : '☐'}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.checkboxLabel}>
+                    Autorizo expor minhas informações de contato
+                  </Text>
+                </View>
+              )}
+
+              {duvida.tipoResposta === 'presencial' && (
+                <View style={styles.checkboxContainer}>
+                  <TouchableOpacity
+                    onPress={() => setDuvida({...duvida, aceitaBiblioteca: !duvida.aceitaBiblioteca})}
+                    style={styles.checkbox}
+                  >
+                    <Text style={{fontSize: 18}}>
+                      {duvida.aceitaBiblioteca ? '☑' : '☐'}
+                    </Text>
+                  </TouchableOpacity>
+                  <Text style={styles.checkboxLabel}>
+                    Estou ciente que devo consultar disponibilidade da biblioteca
+                  </Text>
+                </View>
+              )}
+
+              <TouchableOpacity
+                style={styles.buttonGreen} // Alterado para verde
+                onPress={() => {
+                  // Validações
+                  if (!duvida.curso || !duvida.disciplina) {
+                    Alert.alert("Atenção", "Selecione o curso e a disciplina");
+                    return;
+                  }
+                  if (!duvida.texto) {
+                    Alert.alert("Atenção", "Descreva sua dúvida");
+                    return;
+                  }
+                  if (!duvida.tipoResposta) {
+                    Alert.alert("Atenção", "Selecione como deseja ser respondido");
+                    return;
+                  }
+                  if (duvida.tipoResposta === "contato" && !duvida.autorizaContato) {
+                     Alert.alert("Atenção", "Você precisa autorizar a exposição dos seus contatos para ser respondido por Contato Direto.");
+                     return;
+                  }
+                   if (duvida.tipoResposta === "presencial" && !duvida.aceitaBiblioteca) {
+                     Alert.alert("Atenção", "Você precisa estar ciente sobre a consulta da disponibilidade da biblioteca.");
+                     return;
+                  }
+                  setDuvidaEnviada(true);
+                }}
+              >
+                <Text style={styles.buttonText}>Enviar Dúvida</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+                 <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.confirmationContainer}>
+              <Text style={styles.title}>Dúvida Enviada!</Text>
+              <Text style={styles.confirmationText}>Sua dúvida foi enviada com sucesso. Você será notificado quando ela for respondida.</Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  setDuvidaEnviada(false);
+                  setDuvida({ curso: '', disciplina: '', texto: '', tipoResposta: '', autorizaContato: false, aceitaBiblioteca: false }); // Limpa o formulário
+                  setTela('home');
+                }}
+              >
+                <Text style={styles.buttonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* Tela Responder Dúvida (Existente) */}
+      {tela === 'responderDuvida' && (
+        <ScrollView style={styles.formContainer}>
+          {!respostaEnviada ? (
+            <>
+              <Text style={styles.title}>Responder Dúvida</Text>
+
+              <Text style={styles.label}>Curso:</Text>
+              <View style={styles.dropdownContainer}>
+                <Picker
+                  selectedValue={responderDuvida.curso}
+                  onValueChange={(itemValue) => setResponderDuvida({
+                    ...responderDuvida,
+                    curso: itemValue,
+                    disciplina: '', // Reseta disciplina
+                    duvidas: [] // Limpa dúvidas
+                  })}
+                  style={styles.dropdown}
+                  mode="dropdown"
+                >
+                  <Picker.Item label="Selecione o curso" value="" />
+                  {Object.keys(cursosDisciplinas).map((curso) => (
+                    <Picker.Item key={curso} label={curso} value={curso} />
+                  ))}
+                </Picker>
+              </View>
+
+              {responderDuvida.curso && (
+                <>
+                  <Text style={styles.label}>Disciplina:</Text>
+                  <View style={styles.dropdownContainer}>
+                    <Picker
+                      selectedValue={responderDuvida.disciplina}
+                      onValueChange={(itemValue) => handleSelecionarDisciplina(itemValue)}
+                      style={styles.dropdown}
+                      mode="dropdown"
+                    >
+                      <Picker.Item label="Selecione a disciplina" value="" />
+                      {cursosDisciplinas[responderDuvida.curso].map((disciplina) => (
+                        <Picker.Item key={disciplina} label={disciplina} value={disciplina} />
+                      ))}
+                    </Picker>
+                  </View>
+                </>
+              )}
+
+              {responderDuvida.disciplina && responderDuvida.duvidas.length > 0 && (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={styles.subtitle}>Dúvidas Pendentes:</Text>
+                  {responderDuvida.duvidas.map((item) => (
+                    <View key={item.id} style={styles.duvidaItemContainer}>
+                      <TouchableOpacity onPress={() => toggleExpandirDuvida(item.id)} style={styles.duvidaHeader}>
+                        <Text style={styles.duvidaAluno}>{item.aluno}:</Text>
+                        <Text style={styles.duvidaTextoPreview}>{item.duvida.substring(0, 50)}...</Text>
+                        <Text>{item.expandida ? '➖' : '➕'}</Text>
+                      </TouchableOpacity>
+                      {item.expandida && (
+                        <View style={styles.duvidaExpandidaContainer}>
+                          <Text style={styles.duvidaTextoCompleto}>Dúvida: {item.duvida}</Text>
+                          <Text style={styles.duvidaMoedas}>Recompensa: {item.moedas} E-Coins</Text>
+                          <TextInput
+                            style={[styles.input, { height: 100, textAlignVertical: 'top', marginTop: 10 }]}
+                            placeholder="Digite sua resposta aqui..."
+                            multiline
+                            value={item.resposta}
+                            onChangeText={(text) => handleRespostaChange(item.id, text)}
+                          />
+                           <View style={styles.checkboxContainer}>
+                              <TouchableOpacity
+                                onPress={() => setResponderDuvida({...responderDuvida, respostaConfirmada: !responderDuvida.respostaConfirmada})}
+                                style={styles.checkbox}
+                              >
+                                <Text style={{fontSize: 18}}>
+                                  {responderDuvida.respostaConfirmada ? '☑' : '☐'}
+                                </Text>
+                              </TouchableOpacity>
+                              <Text style={styles.checkboxLabel}>
+                                Confirmo que respondi com seriedade e respeito.*
+                              </Text>
+                            </View>
+                          <TouchableOpacity style={styles.buttonGreen} onPress={() => enviarResposta(item.id)}>
+                            <Text style={styles.buttonText}>Enviar Resposta</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+              {responderDuvida.disciplina && responderDuvida.duvidas.length === 0 && (
+                 <Text style={{marginTop: 20, textAlign: 'center'}}>Nenhuma dúvida pendente para esta disciplina.</Text>
+              )}
+
+              <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+                 <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <View style={styles.confirmationContainer}>
+              <Text style={styles.title}>Resposta Enviada!</Text>
+              <Text style={styles.confirmationText}>Sua resposta foi enviada com sucesso. Após análise, você receberá seus E-Coins.</Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  setRespostaEnviada(false);
+                  // Resetar estado se necessário
+                  setResponderDuvida({
+                    curso: '',
+                    disciplina: '',
+                    duvidas: [],
+                    respostaConfirmada: false
+                  });
+                  setTela('home');
+                }}
+              >
+                <Text style={styles.buttonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* Tela Grupos de Estudo (Existente) */}
+      {tela === 'gruposEstudo' && (
+        <ScrollView style={styles.formContainer}>
+          {grupoEstudo.tela === 'inicio' && (
+            <>
+              <Text style={styles.title}>Grupos de Estudo e Networking</Text>
+              <TouchableOpacity style={styles.button} onPress={() => setGrupoEstudo({ ...grupoEstudo, tela: 'criar' })}>
+                <Text style={styles.buttonText}>Criar Novo Grupo</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => setGrupoEstudo({ ...grupoEstudo, tela: 'entrar' })}>
+                <Text style={styles.buttonText}>Entrar em um Grupo de Estudo</Text>
+              </TouchableOpacity>
+              {/* Botão para mostrar/ocultar Networking */}
+              <TouchableOpacity style={styles.button} onPress={() => setGrupoEstudo(prev => ({ ...prev, mostrarNetworking: !prev.mostrarNetworking }))}>
+                <Text style={styles.buttonText}>{grupoEstudo.mostrarNetworking ? 'Ocultar' : 'Ver'} Grupos de Networking</Text>
+              </TouchableOpacity>
+
+              {/* Lista de Grupos de Networking (Condicional) */}
+              {grupoEstudo.mostrarNetworking && (
+                <View style={{marginTop: 20}}>
+                  <Text style={styles.subtitle}>Grupos de Networking</Text>
+                  {grupoEstudo.gruposNetworking.map((grupo) => (
+                    <View key={grupo.id} style={styles.grupoItemContainer}>
+                      <TouchableOpacity onPress={() => toggleExpandirNetworking(grupo.id)} style={styles.grupoHeader}>
+                         <Text style={styles.grupoTitulo}>{grupo.titulo}</Text>
+                         <Text>{grupo.expandido ? '➖' : '➕'}</Text>
+                      </TouchableOpacity>
+                      {grupo.expandido && (
+                        <View style={styles.grupoExpandidoContainer}>
+                          <Text style={styles.grupoDescricao}>{grupo.descricao}</Text>
+                          <Text style={styles.grupoInfo}>Informações: {grupo.informacoes}</Text>
+                          {/* Botão para entrar no grupo de networking */}
+                          <TouchableOpacity 
+                            style={styles.buttonGreen} 
+                            onPress={() => {
+                              setGrupoEstudo(prev => ({ 
+                                ...prev, 
+                                tela: 'confirmacaoNetworking', 
+                                confirmacaoNetworkingId: grupo.id 
+                              }));
+                            }}
+                          >
+                            <Text style={styles.buttonText}>Entrar no Grupo</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+                 <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
+          {grupoEstudo.tela === 'criar' && (
+             <View>
+                <Text style={styles.title}>Criar Novo Grupo</Text>
+                {/* Formulário de criação */}
+                <Text style={styles.label}>Tipo de Grupo:</Text>
+                 <View style={styles.optionsContainer}>
+                    <TouchableOpacity
+                      style={[styles.responseButton, grupoEstudo.tipoGrupo === 'estudo' && styles.buttonGreen]} // Alterado para verde
+                      onPress={() => setGrupoEstudo({...grupoEstudo, tipoGrupo: 'estudo'})}
+                    >
+                      <Text style={styles.responseText}>Estudo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.responseButton, grupoEstudo.tipoGrupo === 'networking' && styles.buttonGreen]} // Alterado para verde
+                      onPress={() => setGrupoEstudo({...grupoEstudo, tipoGrupo: 'networking'})}
+                    >
+                      <Text style={styles.responseText}>Networking</Text>
+                    </TouchableOpacity>
+                 </View>
+
+                 {grupoEstudo.tipoGrupo === 'estudo' && (
+                    <>
+                        <Text style={styles.label}>Curso:</Text>
+                        {/* Picker Curso */}
+                        <Text style={styles.label}>Disciplina:</Text>
+                        {/* Picker Disciplina */}
+                    </>
+                 )}
+
+                 <TextInput style={styles.input} placeholder="Nome do Grupo" onChangeText={(text) => setGrupoEstudo({...grupoEstudo, nomeGrupo: text})} />
+                 <TextInput style={[styles.input, {height: 80, textAlignVertical: 'top'}]} placeholder="Descrição" multiline onChangeText={(text) => setGrupoEstudo({...grupoEstudo, descricao: text})} />
+                 <TextInput style={[styles.input, {height: 80, textAlignVertical: 'top'}]} placeholder="Informações (dia, hora, local, contato)" multiline onChangeText={(text) => setGrupoEstudo({...grupoEstudo, informacoes: text})} />
+
+                 <TouchableOpacity style={styles.buttonGreen} onPress={() => { /* Lógica de criar grupo */ setGrupoEstudo({...grupoEstudo, tela: 'confirmacaoCriacao'}) }}>
+                    <Text style={styles.buttonText}>Criar Grupo</Text>
+                 </TouchableOpacity>
+                 <TouchableOpacity onPress={() => setGrupoEstudo({...grupoEstudo, tela: 'inicio'})} style={styles.backButton}>
+                    <Text style={styles.backButtonText}>Cancelar</Text>
+                 </TouchableOpacity>
+             </View>
+          )}
+
+          {grupoEstudo.tela === 'entrar' && (
+            <View>
+              <Text style={styles.title}>Entrar em um Grupo de Estudo</Text>
+              {/* Seleção de Curso e Disciplina */}
+              <Text style={styles.label}>Curso:</Text>
+              <View style={styles.dropdownContainer}>
+                 <Picker
+                    selectedValue={grupoEstudo.curso}
+                    onValueChange={(itemValue) => setGrupoEstudo({
+                        ...grupoEstudo,
+                        curso: itemValue,
+                        disciplina: '',
+                        gruposDisponiveis: []
+                    })}
+                    style={styles.dropdown}
+                    mode="dropdown"
+                 >
+                    <Picker.Item label="Selecione o curso" value="" />
+                    {Object.keys(cursosDisciplinas).map((curso) => (
+                        <Picker.Item key={curso} label={curso} value={curso} />
+                    ))}
+                 </Picker>
+              </View>
+
+              {grupoEstudo.curso && (
+                <>
+                  <Text style={styles.label}>Disciplina:</Text>
+                  <View style={styles.dropdownContainer}>
+                    <Picker
+                      selectedValue={grupoEstudo.disciplina}
+                      onValueChange={(itemValue) => handleSelecionarDisciplinaGrupo(itemValue)}
+                      style={styles.dropdown}
+                      mode="dropdown"
+                    >
+                      <Picker.Item label="Selecione a disciplina" value="" />
+                      {cursosDisciplinas[grupoEstudo.curso].map((disciplina) => (
+                        <Picker.Item key={disciplina} label={disciplina} value={disciplina} />
+                      ))}
+                    </Picker>
+                  </View>
+                </>
+              )}
+
+              {/* Lista de Grupos Disponíveis */}
+              {grupoEstudo.disciplina && grupoEstudo.gruposDisponiveis.length > 0 && (
+                <View style={{ marginTop: 20 }}>
+                  <Text style={styles.subtitle}>Grupos Disponíveis:</Text>
+                  {grupoEstudo.gruposDisponiveis.map((grupo) => (
+                    <View key={grupo.id} style={styles.grupoItemContainer}>
+                      <TouchableOpacity onPress={() => toggleExpandirGrupo(grupo.id)} style={styles.grupoHeader}>
+                        <Text style={styles.grupoTitulo}>{grupo.titulo}</Text>
+                        <Text>{grupo.expandido ? '➖' : '➕'}</Text>
+                      </TouchableOpacity>
+                      {grupo.expandido && (
+                        <View style={styles.grupoExpandidoContainer}>
+                          <Text style={styles.grupoDescricao}>{grupo.descricao}</Text>
+                          <Text style={styles.grupoInfo}>Informações: {grupo.informacoes}</Text>
+                          <View style={styles.checkboxContainer}>
+                              <TouchableOpacity
+                                onPress={() => setGrupoEstudo({...grupoEstudo, confirmacao: !grupoEstudo.confirmacao})}
+                                style={styles.checkbox}
+                              >
+                                <Text style={{fontSize: 18}}>
+                                  {grupoEstudo.confirmacao ? '☑' : '☐'}
+                                </Text>
+                              </TouchableOpacity>
+                              <Text style={styles.checkboxLabel}>
+                                Compreendo e aceito os termos de convivência do grupo.*
+                              </Text>
+                          </View>
+                          <TouchableOpacity style={styles.buttonGreen} onPress={enviarSolicitacaoGrupo}>
+                            <Text style={styles.buttonText}>Solicitar Entrada</Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
+               {grupoEstudo.disciplina && grupoEstudo.gruposDisponiveis.length === 0 && (
+                 <Text style={{marginTop: 20, textAlign: 'center'}}>Nenhum grupo de estudo disponível para esta disciplina.</Text>
+              )}
+
+              <TouchableOpacity onPress={() => setGrupoEstudo({...grupoEstudo, tela: 'inicio'})} style={styles.backButton}>
+                 <Text style={styles.backButtonText}>Voltar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {(grupoEstudo.tela === 'confirmacao' || grupoEstudo.tela === 'confirmacaoCriacao' || grupoEstudo.tela === 'confirmacaoNetworking') && (
+            <View style={styles.confirmationContainer}>
+              <Text style={styles.title}>
+                {grupoEstudo.tela === 'confirmacao' ? 'Solicitação Enviada!' : 
+                 grupoEstudo.tela === 'confirmacaoCriacao' ? 'Grupo Criado!' : 
+                 'Solicitação Enviada!' /* Para Networking */}
+              </Text>
+              <Text style={styles.confirmationText}>
+                {grupoEstudo.tela === 'confirmacao' 
+                  ? 'Sua solicitação para entrar no grupo de estudo foi enviada ao administrador.'
+                  : grupoEstudo.tela === 'confirmacaoCriacao'
+                  ? 'Seu grupo foi criado com sucesso!'
+                  : `Sua solicitação para entrar no grupo de networking "${grupoEstudo.gruposNetworking.find(g => g.id === grupoEstudo.confirmacaoNetworkingId)?.titulo || ''}" foi registrada.` /* Mensagem Networking */}
+              </Text>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => {
+                  // Resetar estado se necessário
+                  setGrupoEstudo({
+                    tela: 'inicio',
+                    curso: '',
+                    disciplina: '',
+                    tipoGrupo: '',
+                    nomeGrupo: '',
+                    descricao: '',
+                    informacoes: '',
+                    confirmacao: false,
+                    grupoSelecionado: null,
+                    gruposDisponiveis: [],
+                    gruposNetworking: GRUPOS_NETWORKING.map(g => ({ ...g, expandido: false })),
+                    mostrarNetworking: false, // Resetar visibilidade
+                    confirmacaoNetworkingId: null // Resetar ID
+                  });
+                  setTela('home');
+                }}
+              >
+                <Text style={styles.buttonText}>Voltar à Área do Estudante</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* --- NOVAS TELAS --- */}
+
+      {/* Tela Loja do Estudante */}
+      {tela === 'loja' && (
+        <ScrollView style={styles.formContainer}>
+          <Text style={styles.title}>Loja do Estudante</Text>
+          <Text style={styles.subtitle}>Seus E-Coins: {eCoins}</Text>
+
+          {ITENS_LOJA.map((item) => (
+            <View key={item.id} style={styles.lojaItemContainer}>
+              <Text style={styles.lojaItemDescricao}>{item.descricao} - {item.moedas} E-COINS</Text>
+              <TouchableOpacity style={styles.buttonGreen} onPress={() => comprarItemLoja(item)}>
+                <Text style={styles.buttonText}>COMPRAR</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+
+          <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Tela Confirmação de Compra */}
+      {tela === 'compraConfirmada' && (
+        <View style={styles.confirmationContainer}>
+          <Text style={styles.title}>Parabéns!</Text>          <Text style={styles.confirmationText}>
+            {'Você utilizou seus E-COINS da melhor forma possível!'}
+            {'\n\n'}
+            {'Continue ajudando nossa comunidade para garantir mais e-coins e fazer novos resgates.'}
+          </Text>          <TouchableOpacity style={styles.button} onPress={() => setTela('loja')}>
+            <Text style={styles.buttonText}>Voltar para a Loja</Text>
+          </TouchableOpacity>
+           <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Tela Meus Chats */}
+      {tela === 'chats' && (
+        <ScrollView style={styles.formContainer}>
+          <Text style={styles.title}>Meus Chats</Text>
+
+          {chats.map((chat) => (
+            <View key={chat.id} style={styles.chatItemContainer}>
+              <TouchableOpacity
+                onPress={() => toggleExpandirChat(chat.id)}
+                style={[
+                  styles.chatHeader,
+                  !chat.expandido && chat.tipo === 'estudo' && styles.chatHeaderAzul,
+                  !chat.expandido && chat.tipo === 'aprovacao' && styles.chatHeaderAzul, // Aprovação também azul
+                  !chat.expandido && chat.tipo === 'networking' && styles.chatHeaderVerde,
+                ]}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.chatRemetente}>{chat.remetente} - {chat.nomeGrupo}</Text>
+                </View>
+                {chat.naoLidas > 0 && !chat.expandido && (
+                  <View style={styles.badgeNaoLidas}>
+                    <Text style={styles.textoNaoLidas}>{chat.naoLidas}</Text>
+                  </View>
+                )}
+                <Text style={{ marginLeft: 10 }}>{chat.expandido ? '➖' : '➕'}</Text>
+              </TouchableOpacity>
+
+              {chat.expandido && (
+                <View style={styles.chatExpandidoContainer}>
+                  {/* Mensagens do Chat (Agora com ScrollView) */} 
+                  <ScrollView style={styles.chatMensagensScrollContainer}>
+                    <View style={styles.chatMensagensContainer}>
+                      {chat.mensagens.map((msg) => (
+                        <View key={msg.id} style={[styles.chatMensagemBubble, msg.autor === 'Você' ? styles.chatMensagemVoce : styles.chatMensagemOutro]}>
+                          <Text style={styles.chatMensagemAutor}>{msg.autor}</Text>
+                          <Text style={styles.chatMensagemTexto}>{msg.texto}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </ScrollView>
+
+                  {/* Input e Botão de Enviar (Exceto para aprovação) */} 
+                  {chat.tipo !== 'aprovacao' && (
+                    <View style={styles.chatInputContainer}>
+                      <TextInput
+                        style={styles.chatInput}
+                        placeholder="Digite sua mensagem..."
+                        value={mensagemChat}
+                        onChangeText={setMensagemChat}
+                      />
+                      <TouchableOpacity style={styles.buttonGreen} onPress={() => enviarMensagemChat(chat.id)}>
+                        <Text style={styles.buttonText}>Enviar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
+
+          <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Tela Minhas Dúvidas */}
+      {tela === 'minhasDuvidas' && (
+        <ScrollView style={styles.formContainer}>
+          <Text style={styles.title}>Minhas Dúvidas Respondidas</Text>
+
+          {duvidasRespondidas.map((duvida) => (
+            <View key={duvida.id} style={styles.duvidaRespItemContainer}>
+              <TouchableOpacity onPress={() => toggleExpandirDuvidaRespondida(duvida.id)} style={styles.duvidaRespHeader}>
+                <Text style={styles.duvidaRespPreview}>{duvida.perguntaResumo}</Text>
+                <Text style={styles.duvidaRespPor}>por {duvida.respondidoPor}</Text>
+                <Text>{duvida.expandida ? '➖' : '➕'}</Text>
+              </TouchableOpacity>
+
+              {duvida.expandida && (
+                <View style={styles.duvidaRespExpandidaContainer}>
+                  <Text style={styles.duvidaRespCompletaLabel}>Pergunta:</Text>
+                  <Text style={styles.duvidaRespCompletaTexto}>{duvida.perguntaCompleta}</Text>
+                  <Text style={styles.duvidaRespCompletaLabel}>Resposta:</Text>
+                  <Text style={styles.duvidaRespCompletaTexto}>{duvida.resposta}</Text>
+
+                  {!duvida.avaliacaoEnviada ? (
+                     <TouchableOpacity style={[styles.buttonGreen, { alignSelf: 'center', marginTop: 15 }]} onPress={() => iniciarAvaliacao(duvida.id)}>
+                        <Text style={styles.buttonText}>Gostou da Resposta? Avalie Aqui</Text>
+                     </TouchableOpacity>
+                  ) : (
+                     <Text style={styles.avaliacaoEnviadaTexto}>Avaliação enviada ({duvida.avaliacao} estrelas).</Text>
+                  )}
+                </View>
+              )}
+            </View>
+          ))}
+
+          {duvidasRespondidas.length === 0 && (
+            <Text style={{ marginTop: 20, textAlign: 'center', color: 'gray' }}>Você ainda não tem dúvidas respondidas.</Text>
+          )}
+
+          <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Tela de Avaliação da Dúvida */}
+      {tela === 'avaliacaoDuvida' && (
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Avaliar Resposta</Text>
+          <Text style={styles.subtitle}>Como você avalia a resposta recebida?</Text>
+
+          {/* Estrelas de Avaliação */} 
+          <View style={styles.estrelasContainer}>
+            {[1, 2, 3, 4, 5].map((numEstrela) => (
+              <TouchableOpacity key={numEstrela} onPress={() => setAvaliacaoEstrelas(numEstrela)}>
+                <Text style={[styles.estrela, avaliacaoEstrelas >= numEstrela ? styles.estrelaSelecionada : {}]}>
+                  ★
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TextInput
+            style={[styles.input, { height: 100, textAlignVertical: 'top', marginTop: 20 }]}
+            placeholder="Deixe um comentário (opcional)..."
+            multiline
+            value={avaliacaoComentario}
+            onChangeText={setAvaliacaoComentario}
+          />
+
+          <TouchableOpacity style={styles.buttonGreen} onPress={confirmarAvaliacao}>
+            <Text style={styles.buttonText}>CONFIRMAR AVALIAÇÃO</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setTela('minhasDuvidas')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Cancelar</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Tela Confirmação de Avaliação */}
+      {tela === 'avaliacaoConfirmada' && (
+        <View style={styles.confirmationContainer}>
+          <Text style={styles.title}>Espero que tenha sido ajudado!</Text>
+          <Text style={styles.confirmationText}>
+            A sua confirmação será enviada para o moderador e o professor/monitor da cadeira e o aluno que enviou será premiado de acordo com a resposta.
+          </Text>
+          <TouchableOpacity style={styles.button} onPress={() => setTela('minhasDuvidas')}>
+            <Text style={styles.buttonText}>Voltar para Minhas Dúvidas</Text>
+          </TouchableOpacity>
+           <TouchableOpacity onPress={() => setTela('home')} style={styles.backButton}>
+            <Text style={styles.backButtonText}>Voltar à Área do Estudante</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* --- FIM NOVAS TELAS --- */}
+
+    </View>
+  );
+}
+
+// Estilos (Atualizados com novos estilos)
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#144bc8', // Azul Estácio solicitado - ALTERE AQUI A COR DE FUNDO PRINCIPAL
+    paddingTop: 40, // Adiciona espaço no topo
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  logo: {
+    width: 150,
+    height: 150,
+    resizeMode: 'contain',
+    marginBottom: 20,
+  },
+  formContainer: {
+    width: '90%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    // Sombra (opcional, pode variar entre plataformas)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#003366',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+    marginTop: 15,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+    marginTop: 10,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: '#005EB8', // Azul mais escuro Estácio
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16, // Aumentado e negrito
+  },
+  buttonGreen: { // Botão verde para ações específicas
+    backgroundColor: '#00C851', // Verde
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  backButton: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+   backButtonText: {
+    color: '#005EB8',
+    textDecorationLine: 'underline',
+  },
+  box: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 10,
+    alignItems: 'center', // Centraliza horizontalmente
+    justifyContent: 'center', // Centraliza verticalmente
+    width: '100%',
+    // Sombra
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+  },
+  boxTitle: { // Comentário corrigido
+    fontSize: 16, // Ajustado para 16, igual a responseText
+    fontWeight: 'bold',
+    color: '#003366',
+    textAlign: 'center', // Garantir centralização do texto
+  },
+  boxText: { // Estilo para texto dos botões da tela inicial
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#003366',
+    textAlign: 'center',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    marginTop: 5,
+  },
+  checkbox: {
+    marginRight: 10,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    flex: 1, // Para quebrar linha se necessário
+  },
+  confirmationContainer: {
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: '90%',
+  },
+  confirmationText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#333',
+    lineHeight: 22,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  dropdownContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
+    overflow: 'hidden', // Garante que o Picker fique dentro das bordas
+  },
+  dropdown: {
+    height: 50,
+    width: '100%',
+    backgroundColor: '#f0f0f0', // Cor de fundo para melhor visualização
+  },
+  optionsContainer: {
+    // flexDirection: 'row', // Removido para empilhar verticalmente
+    // justifyContent: 'space-around', // Removido
+    marginBottom: 15,
+    marginTop: 5,
+  },
+  responseButton: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+  },
+  selectedResponse: {
+    backgroundColor: '#e0e0e0',
+    borderColor: '#005EB8',
+  },
+  responseText: {
+    fontSize: 16, // Aumentado
+    fontWeight: 'bold', // Adicionado negrito
+  },
+  duvidaItemContainer: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  duvidaHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+  },
+  duvidaAluno: {
+    fontWeight: 'bold',
+    marginRight: 5,
+  },
+  duvidaTextoPreview: {
+    flex: 1,
+    color: '#555',
+  },
+  duvidaExpandidaContainer: {
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  duvidaTextoCompleto: {
+    marginBottom: 5,
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  duvidaMoedas: {
+    fontWeight: 'bold',
+    color: '#00C851',
+    marginTop: 5,
+  },
+  grupoItemContainer: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  grupoHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+  },
+  grupoTitulo: {
+    fontWeight: 'bold',
+    flex: 1,
+    marginRight: 10,
+    fontSize: 16, // Aumentado
+  },
+  grupoExpandidoContainer: {
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  grupoDescricao: {
+    marginBottom: 5,
+  },
+  grupoInfo: {
+    fontStyle: 'italic',
+    color: '#555',
+  },
+  // --- NOVOS ESTILOS --- 
+  lojaItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  lojaItemDescricao: {
+    flex: 1, // Ocupa espaço disponível
+    marginRight: 10,
+    fontSize: 16, // Aumentado
+    fontWeight: 'bold', // Adicionado negrito
+  },
+  chatItemContainer: {
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    overflow: 'hidden', // Para garantir que a cor de fundo não vaze
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: 'white', // Cor padrão quando expandido
+  },
+  chatHeaderAzul: {
+    backgroundColor: '#e3f2fd', // Azul claro para estudo/aprovação
+  },
+  chatHeaderVerde: {
+    backgroundColor: '#e8f5e9', // Verde claro para networking
+  },
+  chatRemetente: {
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  badgeNaoLidas: {
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  textoNaoLidas: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  chatExpandidoContainer: {
+    padding: 10,
+    backgroundColor: 'white',
+  },
+  chatMensagensContainer: {
+    maxHeight: 200, // Limita altura para scroll (se necessário adicionar ScrollView interno)
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 5,
+    padding: 5,
+  },
+  chatMensagemBubble: {
+    padding: 8,
+    borderRadius: 10,
+    marginBottom: 5,
+    maxWidth: '80%',
+  },
+  chatMensagemVoce: {
+    backgroundColor: '#dcf8c6', // Verde claro (como WhatsApp)
+    alignSelf: 'flex-end',
+  },
+  chatMensagemOutro: {
+    backgroundColor: '#fff',
+    alignSelf: 'flex-start',
+    borderWidth: 0.5,
+    borderColor: '#eee',
+  },
+  chatMensagemAutor: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginBottom: 2,
+    color: '#555',
+  },
+  chatMensagemTexto: {
+    fontSize: 15, // Aumentado
+  },
+  chatInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 10,
+  },
+  chatInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginRight: 10,
+    backgroundColor: 'white',
+  },
+  duvidaRespItemContainer: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  duvidaRespHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+  },
+  duvidaRespPreview: {
+    flex: 1,
+    fontWeight: 'bold',
+    marginRight: 5,
+  },
+  duvidaRespPor: {
+    fontSize: 12,
+    color: 'gray',
+    marginRight: 10,
+  },
+  duvidaRespExpandidaContainer: {
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  duvidaRespCompletaLabel: {
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 3,
+    color: '#333',
+  },
+  duvidaRespCompletaTexto: {
+    fontSize: 15,
+    lineHeight: 21,
+    color: '#555',
+  },
+  estrelasContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  estrela: {
+    fontSize: 35,
+    color: '#ccc', // Cor da estrela vazia
+    marginHorizontal: 5,
+  },
+  estrelaSelecionada: {
+    color: '#FFD700', // Cor da estrela preenchida (dourado)
+  },
+  avaliacaoEnviadaTexto: {
+    textAlign: 'center',
+    marginTop: 15,
+    fontStyle: 'italic',
+    color: 'green',
+  },
+});
+
